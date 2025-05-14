@@ -25,9 +25,9 @@ let view = UIView()
 ## 🚀 Installation
 
 📦 Manual
-	1.	Add package dependencies to your xcodeproj using SPM.
-	2.	import Staxa
-	3.	Done!
+1. Add package dependencies to your xcodeproj using SPM.
+2. import Staxa
+3. Done!
 
 Note: Carthage and CocoaPods support coming soon.
 
@@ -56,7 +56,6 @@ class ProfileVC: BuilderLayoutVC {
             UIImageView().image(UIImage(named: "avatar"))
             UILabel().text("Welcome").font(.boldSystemFont(ofSize: 24))
         }
-        .spacing(12)
         .padding(20)
     }
 }
@@ -96,9 +95,9 @@ class HomeViewController: BuilderLayoutVC {
 ```
 
 ## 🛠 Requirements
-	•	iOS 13+
-	•	Swift 5.5+
-	•	Xcode 13+
+• iOS 13+
+• Swift 5.5+
+• Xcode 13+
 
 ## 👨‍💻 Author
 
