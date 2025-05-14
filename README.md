@@ -2,8 +2,6 @@
 
 **Staxa** is a lightweight UIKit SDK that brings **declarative**, **composable**, and **builder-pattern-inspired** view construction to iOS development. Think of it as UIKit with a touch of SwiftUI’s elegance — powered by stacked views, block-based APIs, and clean layout composition.
 
----
-
 ## ✨ Features
 
 - ✅ Declarative UIKit syntax with builder-style chaining  
@@ -11,8 +9,6 @@
 - 🧱 Modular view composition using `BuildableView`  
 - 💡 SwiftUI-inspired layout with `VStack`, `HStack`, `ZStack` equivalents  
 - 🔄 Built-in Combine support for event-driven views  
-
----
 
 ## 📸 Preview
 
@@ -26,8 +22,6 @@ let view = UIView()
     }
 ```
 
----
-
 ## 🚀 Installation
 
 📦 Manual
@@ -37,17 +31,15 @@ let view = UIView()
 
 Note: Carthage and CocoaPods support coming soon.
 
----
-
 ## 🧱 Core Concepts
 
 🧩 StaxaView
 
 A protocol that unlocks a builder-style API for UIKit views.
 
+```swift
 extension UIView: BuildableView {}
 
-```swift
 let button = UIButton()
     .attributedTitle(NSAttributedString(string: "Tap Me"))
     .cornerRadius(8)
@@ -70,8 +62,6 @@ class ProfileVC: BuilderLayoutVC {
 }
 ```
 
----
-
 ## 📐 Layout Building DSL
 
 VStack, HStack, ZStack
@@ -87,8 +77,6 @@ VStackView(spacing: 8) {
 }
 .padding(16)
 ```
-
----
 
 ## 💡 Example
 ```swift
@@ -107,27 +95,19 @@ class HomeViewController: BuilderLayoutVC {
 }
 ```
 
----
-
 ## 🛠 Requirements
 	•	iOS 13+
 	•	Swift 5.5+
 	•	Xcode 13+
-
----
 
 ## 👨‍💻 Author
 
 Built with ❤️ by [Your Name or Team].
 Inspired by SwiftUI, powered by UIKit.
 
----
-
 ## 📄 License
 
 Staxa is available under the MIT license. See LICENSE for more info.
-
----
 
 Let me know if you want:
 
