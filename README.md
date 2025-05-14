@@ -24,7 +24,7 @@ let view = UIView()
 
 ## 🚀 Installation
 
-📦 Manual
+📦 **Manual**
 1. Add package dependencies to your xcodeproj using SPM.
 2. import Staxa
 3. Done!
@@ -33,7 +33,7 @@ Note: Carthage and CocoaPods support coming soon.
 
 ## 🧱 Core Concepts
 
-🧩 StaxaView
+🧩 **StaxaView**
 
 A protocol that unlocks a builder-style API for UIKit views.
 
@@ -45,7 +45,7 @@ let button = UIButton()
     .cornerRadius(8)
 ```
 
-🧱 StaxaViewController
+🧱 **StaxaViewController**
 
 A base UIViewController with a body property for clean declarative layout.
 
