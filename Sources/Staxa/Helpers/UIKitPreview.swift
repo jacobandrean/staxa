@@ -8,18 +8,21 @@
 import SwiftUI
 import UIKit
 
-public struct UIViewPreview<T: UIView>: UIViewRepresentable {
-    let makeView: () -> T
+public struct UIViewPreview<Content: UIView>: UIViewRepresentable {
+    let content: () -> Content
 
-    public init(_ makeView: @escaping () -> T) {
-        self.makeView = makeView
+    public init(_ content: @escaping () -> Content) {
+        self.content = content
     }
 
-    public func makeUIView(context: Context) -> T {
-        return makeView()
+    public func makeUIView(context: Context) -> UIView {
+        let view = content()
+        let container = UIView().addSubviews(view)
+        view.centerConstraint(equalTo: container)
+        return container
     }
 
-    public func updateUIView(_ uiView: T, context: Context) {}
+    public func updateUIView(_ uiView: UIView, context: Context) {}
 }
 
 public struct UIViewControllerPreview<ViewController: UIViewController>: UIViewControllerRepresentable {
@@ -39,9 +42,16 @@ public struct UIViewControllerPreview<ViewController: UIViewController>: UIViewC
 
 #Preview {
     UIViewPreview {
-        let label = UILabel()
-        label.text = "hello world!"
-        return label
+        ZStackView {
+            UIView()
+                .sizeConstraint(width: 50, height: 50)
+                .backgroundColor(.red).cornerRadius(25).padding(20)
+                .backgroundColor(.green).cornerRadius(45).padding(20)
+                .backgroundColor(.blue).cornerRadius(65)
+            UIImageView()
+                .image(.init(systemName: "xmark"))
+                .tintColor(.black)
+        }
     }
 }
 

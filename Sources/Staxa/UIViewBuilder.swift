@@ -57,7 +57,15 @@ public class VStackView: UIStackView {
         self.spacing = spacing
         self.alignment = alignment
         self.translatesAutoresizingMaskIntoConstraints = false
-        content().forEach(addArrangedSubview)
+        var views = content()
+        // Check if there is at least one SpacerView
+        let hasSpacer = views.contains(where: { $0 is SpacerView })
+        // If no SpacerView exists, add one at the top and bottom
+        if !hasSpacer {
+            views.insert(SpacerView(), at: 0)
+            views.append(SpacerView())
+        }
+        views.forEach(addArrangedSubview)
         setEqualHeightForSpacers()
     }
     
@@ -88,7 +96,15 @@ public class HStackView: UIStackView {
         self.spacing = spacing
         self.alignment = alignment
         self.translatesAutoresizingMaskIntoConstraints = false
-        content().forEach(addArrangedSubview)
+        var views = content()
+        // Check if there is at least one SpacerView
+        let hasSpacer = views.contains(where: { $0 is SpacerView })
+        // If no SpacerView exists, add one at the top and bottom
+        if !hasSpacer {
+            views.insert(SpacerView(), at: 0)
+            views.append(SpacerView())
+        }
+        views.forEach(addArrangedSubview)
         setEqualWidthForSpacers()
     }
     

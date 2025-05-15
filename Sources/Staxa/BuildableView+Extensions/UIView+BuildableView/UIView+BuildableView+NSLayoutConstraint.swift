@@ -150,6 +150,14 @@ public extension BuildableView where Self: UIView {
 
     // MARK: - Center X and Center Y
     @discardableResult
+    func centerConstraint(equalTo view: UIView) -> Self {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        self.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        return self
+    }
+    
+    @discardableResult
     func centerXConstraint(equalTo view: UIView, constant: CGFloat = 0) -> Self {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: constant).isActive = true
