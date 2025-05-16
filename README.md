@@ -50,7 +50,7 @@ let button = UIButton()
 A base UIViewController with a body property for clean declarative layout.
 
 ```swift
-class ProfileVC: BuilderLayoutVC {
+class ProfileVC: StaxaViewController {
     override var body: UIView {
         VStack {
             UIImageView().image(UIImage(named: "avatar"))
@@ -79,7 +79,7 @@ VStackView(spacing: 8) {
 
 ## 💡 Example
 ```swift
-class HomeViewController: BuilderLayoutVC {
+class HomeViewController: StaxaViewController {
     override var body: UIView {
         VStack {
             BaleToolbarView(title: "Home")
