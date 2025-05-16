@@ -101,7 +101,7 @@ class HomeViewController: StaxaViewController {
 
 ## 👨‍💻 Author
 
-Built with ❤️ by [Your Name or Team].
+Built with ❤️ by Jacob, Vicky & Irvan.
 Inspired by SwiftUI, powered by UIKit.
 
 ## 📄 License
