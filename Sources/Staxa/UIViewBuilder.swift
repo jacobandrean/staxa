@@ -58,10 +58,11 @@ public class VStackView: UIStackView {
         self.alignment = alignment
         self.translatesAutoresizingMaskIntoConstraints = false
         var views = content()
-        // Check if there is at least one SpacerView
-        let hasSpacer = views.contains(where: { $0 is SpacerView })
-        // If no SpacerView exists, add one at the top and bottom
-        if !hasSpacer {
+        let hasFlexibleContent = views.contains {
+            $0 is SpacerView || String(describing: type(of: $0)).contains("ListView")
+        }
+        // If no SpacerView or ListView exists, add one at the top and bottom
+        if !hasFlexibleContent {
             views.insert(SpacerView(), at: 0)
             views.append(SpacerView())
         }
