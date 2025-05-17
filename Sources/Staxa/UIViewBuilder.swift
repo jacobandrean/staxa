@@ -591,6 +591,7 @@ open class StaxaViewController: UIViewController {
         
         let body = body
         let ignoreSafeArea = body.ignoreSafeArea
+        body.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(body)
         NSLayoutConstraint.activate([
             body.topAnchor.constraint(
