@@ -44,6 +44,7 @@ public class ListView<P: Publisher, Item: Hashable>: StaxaView where P.Output ==
         }
 
         return UICollectionView(frame: .zero, collectionViewLayout: layout)
+            .backgroundColor(.clear)
             .register(UIViewHostingCollectionViewCell.self, identifier: identifier)
             .bind(to: data, section: 0) { collectionView, indexPath, model in
                 guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: self.identifier, for: indexPath) as? UIViewHostingCollectionViewCell else {
