@@ -107,25 +107,10 @@ public extension BuildableView where Self: UIView {
         self.bottomAnchor.constraint(greaterThanOrEqualTo: view.bottomAnchor, constant: constant).isActive = true
         return self
     }
-
-    // MARK: - Width and Height
-    @discardableResult
-    func widthConstraint(_ constant: CGFloat) -> Self {
-        self.translatesAutoresizingMaskIntoConstraints = false
-        self.widthAnchor.constraint(equalToConstant: constant).isActive = true
-        return self
-    }
-
-    @discardableResult
-    func heightConstraint(_ constant: CGFloat) -> Self {
-        self.translatesAutoresizingMaskIntoConstraints = false
-        self.heightAnchor.constraint(equalToConstant: constant).isActive = true
-        return self
-    }
     
     /// BuildableView:
     @discardableResult
-    func sizeConstraint(minWidth: CGFloat? = nil, width: CGFloat? = nil, maxWidth: CGFloat? = nil, minHeight: CGFloat? = nil, height: CGFloat? = nil, maxHeight: CGFloat? = nil) -> Self {
+    func frame(minWidth: CGFloat? = nil, width: CGFloat? = nil, maxWidth: CGFloat? = nil, minHeight: CGFloat? = nil, height: CGFloat? = nil, maxHeight: CGFloat? = nil) -> Self {
         self.translatesAutoresizingMaskIntoConstraints = false
         if let minWidth = minWidth {
             self.widthAnchor.constraint(greaterThanOrEqualToConstant: minWidth).isActive = true
@@ -185,25 +170,6 @@ public extension BuildableView where Self: UIView {
         self.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate(constraints(self))
         return self
-    }
-    
-    /// BuildableView:
-    @discardableResult
-    func padding(_ insets: UIEdgeInsets = .init(top: 16, left: 16, bottom: 16, right: 16)) -> UIView {
-        let containerView = UIView()
-        containerView.layoutMargins = insets
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        self.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(self)
-        
-        NSLayoutConstraint.activate([
-            self.leadingAnchor.constraint(equalTo: containerView.layoutMarginsGuide.leadingAnchor),
-            self.trailingAnchor.constraint(equalTo: containerView.layoutMarginsGuide.trailingAnchor),
-            self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
-            self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
-        ])
-        
-        return containerView
     }
     
     @discardableResult

@@ -44,7 +44,7 @@ public struct UIViewControllerPreview<ViewController: UIViewController>: UIViewC
     UIViewPreview {
         ZStackView {
             UIView()
-                .sizeConstraint(width: 50, height: 50)
+                .frame(width: 50, height: 50)
                 .backgroundColor(.red).cornerRadius(25).padding(20)
                 .backgroundColor(.green).cornerRadius(45).padding(20)
                 .backgroundColor(.blue).cornerRadius(65)
