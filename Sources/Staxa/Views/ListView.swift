@@ -8,10 +8,11 @@
 import Combine
 import UIKit
 
-public class ListView<Item: Hashable>: StaxaView {
+public class ListView<Item: Hashable>: StaxaView, UICollectionViewDelegate {
     private let spacing: CGFloat
     private let identifier: String
     private let rowContent: (Item) -> UIView
+    private var onWillDisplayItem: ((Item) -> Void)?
     @Published private var data: [Item] = []
     
     public init<P: Publisher>(
@@ -58,6 +59,7 @@ public class ListView<Item: Hashable>: StaxaView {
         }
 
         return UICollectionView(frame: .zero, collectionViewLayout: layout)
+            .delegate(self)
             .backgroundColor(.clear)
             .register(UIViewHostingCollectionViewCell.self, identifier: identifier)
             .bind(to: $data, section: 0) { collectionView, indexPath, model in
@@ -67,5 +69,19 @@ public class ListView<Item: Hashable>: StaxaView {
                 cell.setContent(self.rowContent(model))
                 return cell
             }
+    }
+    
+    // MARK: - Delegate
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard indexPath.item < data.count else { return }
+        let item = data[indexPath.item]
+        onWillDisplayItem?(item)
+    }
+    
+    // MARK: - builder pattern helper
+    @discardableResult
+    public func onWillDisplayItem(_ action: @escaping (Item) -> Void) -> Self {
+        self.onWillDisplayItem = action
+        return self
     }
 }
