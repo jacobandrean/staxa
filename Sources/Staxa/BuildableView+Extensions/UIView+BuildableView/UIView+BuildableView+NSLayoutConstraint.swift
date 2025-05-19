@@ -186,7 +186,23 @@ public extension BuildableView where Self: UIView {
             self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
             self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
         ])
+        return containerView
+    }
+    
+    @discardableResult
+    func padding() -> UIView {
+        let containerView = UIView()
+        containerView.layoutMargins = .init(top: 16, left: 16, bottom: 16, right: 16)
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        self.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(self)
         
+        NSLayoutConstraint.activate([
+            self.leadingAnchor.constraint(equalTo: containerView.layoutMarginsGuide.leadingAnchor),
+            self.trailingAnchor.constraint(equalTo: containerView.layoutMarginsGuide.trailingAnchor),
+            self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
+            self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
+        ])
         return containerView
     }
     
@@ -204,7 +220,6 @@ public extension BuildableView where Self: UIView {
             self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
             self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
         ])
-        
         return containerView
     }
 }
