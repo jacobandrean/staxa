@@ -82,9 +82,9 @@ VStackView(spacing: 8) {
 class HomeViewController: StaxaViewController {
     override var body: UIView {
         VStack {
-            BaleToolbarView(title: "Home")
+            ToolbarView(title: "Home")
             CountdownView()
-            BaleButton(title: "Get Started") {
+            Button(title: "Get Started") {
                 print("Tapped Start")
             }
         }
@@ -110,7 +110,6 @@ Staxa is available under the MIT license. See LICENSE for more info.
 
 Let me know if you want:
 
-- A `Package.swift` ready for SPM in the future  
 - Usage badges at the top (e.g., iOS version, license, etc.)  
 - A "Contributing" section for open source projects  
 
