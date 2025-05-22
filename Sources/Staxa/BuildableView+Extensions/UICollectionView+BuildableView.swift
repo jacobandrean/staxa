@@ -51,6 +51,26 @@ public extension BuildableView where Self: UICollectionView {
         return self
     }
     
+    @discardableResult
+    func register<SupplementaryView: UICollectionReusableView>(
+        _ supplementaryViewType: SupplementaryView.Type,
+        ofKind kind: String
+    ) -> Self {
+        let identifier = String(describing: supplementaryViewType)
+        self.register(supplementaryViewType, forSupplementaryViewOfKind: kind, withReuseIdentifier: identifier)
+        return self
+    }
+    
+    @discardableResult
+    func register<SupplementaryView: UICollectionReusableView>(
+        _ supplementaryViewType: SupplementaryView.Type,
+        ofKind kind: String,
+        identifier: String
+    ) -> Self {
+        self.register(supplementaryViewType, forSupplementaryViewOfKind: kind, withReuseIdentifier: identifier)
+        return self
+    }
+    
     /// BuildableView: The layout used to organize the collected view’s items.
     @discardableResult
     func collectionViewLayout(_ layout: UICollectionViewLayout) -> Self {
@@ -165,6 +185,37 @@ public extension BuildableView where Self: UICollectionView {
         
         return self
     }
+    
+    @discardableResult
+    func bind<Section: Hashable, Item: Hashable, P: Publisher>(
+        to publisher: P,
+        supplementaryViewProvider: ((UICollectionView, String, Section, IndexPath) -> UICollectionReusableView)? = nil,
+        cellProvider: @escaping (UICollectionView, IndexPath, Item) -> UICollectionViewCell
+    ) -> Self where P.Output == [(Section, [Item])], P.Failure == Never {
+        
+        let dataSourceWrapper = CombineCollectionViewDiffableDataSourceWrapper<Section, Item>(
+            collectionView: self,
+            cellProvider: cellProvider
+        )
+        self.dataSource = dataSourceWrapper.dataSource
+        
+        // Assign supplementary view provider if provided
+        if let supplementaryViewProvider = supplementaryViewProvider {
+            dataSourceWrapper.dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
+                let section = dataSourceWrapper.dataSource.snapshot().sectionIdentifiers[indexPath.section]
+                return supplementaryViewProvider(collectionView, kind, section, indexPath)
+            }
+        }
+        
+        publisher
+            .receive(on: DispatchQueue.main)
+            .sink { sectionedItems in
+                dataSourceWrapper.apply(sectionedItems: sectionedItems)
+            }
+            .store(in: &viewCancellables)
+        
+        return self
+    }
 }
 
 /// Custom Combine-powered UICollectionViewDataSource
@@ -206,6 +257,15 @@ private class CombineCollectionViewDiffableDataSourceWrapper<Section: Hashable, 
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections([section])
         snapshot.appendItems(items, toSection: section)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    func apply(sectionedItems: [(Section, [Item])]) {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        for (section, items) in sectionedItems {
+            snapshot.appendSections([section])
+            snapshot.appendItems(items, toSection: section)
+        }
         dataSource.apply(snapshot, animatingDifferences: true)
     }
 }

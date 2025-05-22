@@ -56,3 +56,28 @@ public class UIViewHostingCollectionViewCell: UICollectionViewCell {
         hostedView = nil
     }
 }
+
+public class UIViewHostingCollectionSupplementaryView: UICollectionReusableView {
+    public private(set) var hostedView: UIView?
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    public func setContent(_ view: UIView) {
+        hostedView?.removeFromSuperview()
+        hostedView = view
+        addSubview(view)
+        view.pin(to: self)
+    }
+
+    public override func prepareForReuse() {
+        super.prepareForReuse()
+        hostedView?.removeFromSuperview()
+        hostedView = nil
+    }
+}
