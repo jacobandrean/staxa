@@ -20,6 +20,16 @@ public extension BuildableView where Self: UIView {
         return self
     }
     
+    @discardableResult
+    func pin(to view: UIView, top: CGFloat = 0, leading: CGFloat = 0, bottom: CGFloat = 0, trailing: CGFloat = 0) -> Self {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.topAnchor.constraint(equalTo: view.topAnchor, constant: top).isActive = true
+        self.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -bottom).isActive = true
+        self.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leading).isActive = true
+        self.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -trailing).isActive = true
+        return self
+    }
+    
     // MARK: - Top Anchor
     @discardableResult
     func topConstraint(equalTo view: UIView, constant: CGFloat = 0) -> Self {
@@ -175,6 +185,36 @@ public extension BuildableView where Self: UIView {
     @discardableResult
     func padding(top: CGFloat = 0, left: CGFloat = 0, bottom: CGFloat = 0, right: CGFloat = 0) -> UIView {
         let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(self)
+        self.pin(
+            to: containerView,
+            top: top,
+            leading: left,
+            bottom: bottom,
+            trailing: right
+        )
+        return containerView
+    }
+    
+    @discardableResult
+    func padding(_ allEdges: CGFloat = 16) -> UIView {
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(self)
+        self.pin(
+            to: containerView,
+            top: allEdges,
+            leading: allEdges,
+            bottom: allEdges,
+            trailing: allEdges
+        )
+        return containerView
+    }
+    
+    @discardableResult
+    func margins(top: CGFloat = 0, left: CGFloat = 0, bottom: CGFloat = 0, right: CGFloat = 0) -> UIView {
+        let containerView = UIView()
         containerView.layoutMargins = .init(top: top, left: left, bottom: bottom, right: right)
         containerView.translatesAutoresizingMaskIntoConstraints = false
         self.translatesAutoresizingMaskIntoConstraints = false
@@ -186,28 +226,12 @@ public extension BuildableView where Self: UIView {
             self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
             self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
         ])
-        return containerView
-    }
-    
-    @discardableResult
-    func padding() -> UIView {
-        let containerView = UIView()
-        containerView.layoutMargins = .init(top: 16, left: 16, bottom: 16, right: 16)
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        self.translatesAutoresizingMaskIntoConstraints = false
-        containerView.addSubview(self)
         
-        NSLayoutConstraint.activate([
-            self.leadingAnchor.constraint(equalTo: containerView.layoutMarginsGuide.leadingAnchor),
-            self.trailingAnchor.constraint(equalTo: containerView.layoutMarginsGuide.trailingAnchor),
-            self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
-            self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
-        ])
         return containerView
     }
     
     @discardableResult
-    func padding(_ allEdges: CGFloat) -> UIView {
+    func margins(_ allEdges: CGFloat = 16) -> UIView {
         let containerView = UIView()
         containerView.layoutMargins = .init(top: allEdges, left: allEdges, bottom: allEdges, right: allEdges)
         containerView.translatesAutoresizingMaskIntoConstraints = false
@@ -220,6 +244,7 @@ public extension BuildableView where Self: UIView {
             self.topAnchor.constraint(equalTo: containerView.layoutMarginsGuide.topAnchor),
             self.bottomAnchor.constraint(equalTo: containerView.layoutMarginsGuide.bottomAnchor)
         ])
+        
         return containerView
     }
 }
