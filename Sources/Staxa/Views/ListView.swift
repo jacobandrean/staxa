@@ -8,6 +8,25 @@
 import Combine
 import UIKit
 
+// MARK: - Model for ListView
+public struct ListSection<Section: Hashable, Item: Hashable>: Hashable {
+    public var title: Section
+    public var items: [Item]
+    
+    public init(title: Section, items: [Item]) {
+        self.title = title
+        self.items = items
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(title)
+    }
+
+    public static func == (lhs: ListSection, rhs: ListSection) -> Bool {
+        lhs.title == rhs.title
+    }
+}
+
 public typealias FlatListView<Item: Hashable> = ListView<Never, Item>
 
 // MARK: - ListView
@@ -19,7 +38,7 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
     }
     
     @Published private var data: [Item] = []
-    @Published private var sectionedData: [(Section, [Item])] = []
+    @Published private var sectionedData: [ListSection<Section, Item>] = []
     private let layout: Layout
     private let spacing: CGFloat
     private let identifier: String
@@ -72,7 +91,7 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
         sectionIdentifier: String = "\(String(describing: UIViewHostingCollectionSupplementaryView.self))_\(String(describing: Section.self))",
         sectionContent: @escaping (Section) -> UIView,
         itemContent: @escaping (Item) -> UIView
-    ) where P.Output == [(Section, [Item])], P.Failure == Never {
+    ) where P.Output == [ListSection<Section, Item>], P.Failure == Never {
         self.layout = layout
         self.spacing = spacing
         self.identifier = identifier
@@ -85,7 +104,7 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
     
     // MARK: Init for static Data
     public convenience init(
-        _ sectionedData: [(Section, [Item])],
+        _ sectionedData: [ListSection<Section, Item>],
         layout: Layout = .adaptive,
         spacing: CGFloat = 0,
         identifier: String = "\(String(describing: UIViewHostingCollectionViewCell.self))_\(String(describing: Item.self))",

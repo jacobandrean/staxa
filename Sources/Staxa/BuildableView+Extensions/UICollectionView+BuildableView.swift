@@ -191,7 +191,7 @@ public extension BuildableView where Self: UICollectionView {
         to publisher: P,
         supplementaryViewProvider: ((UICollectionView, String, Section, IndexPath) -> UICollectionReusableView)? = nil,
         cellProvider: @escaping (UICollectionView, IndexPath, Item) -> UICollectionViewCell
-    ) -> Self where P.Output == [(Section, [Item])], P.Failure == Never {
+    ) -> Self where P.Output == [ListSection<Section, Item>], P.Failure == Never {
         
         let dataSourceWrapper = CombineCollectionViewDiffableDataSourceWrapper<Section, Item>(
             collectionView: self,
@@ -260,11 +260,11 @@ private class CombineCollectionViewDiffableDataSourceWrapper<Section: Hashable, 
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    func apply(sectionedItems: [(Section, [Item])]) {
+    func apply(sectionedItems: [ListSection<Section, Item>]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        for (section, items) in sectionedItems {
-            snapshot.appendSections([section])
-            snapshot.appendItems(items, toSection: section)
+        for sectionItem in sectionedItems {
+            snapshot.appendSections([sectionItem.title])
+            snapshot.appendItems(sectionItem.items, toSection: sectionItem.title)
         }
         dataSource.apply(snapshot, animatingDifferences: true)
     }
