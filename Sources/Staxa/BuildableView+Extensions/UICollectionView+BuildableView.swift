@@ -263,8 +263,8 @@ private class CombineCollectionViewDiffableDataSourceWrapper<Section: Hashable, 
     func apply(sectionedItems: [ListSection<Section, Item>]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         for sectionItem in sectionedItems {
-            snapshot.appendSections([sectionItem.title])
-            snapshot.appendItems(sectionItem.items, toSection: sectionItem.title)
+            snapshot.appendSections([sectionItem.section])
+            snapshot.appendItems(sectionItem.items, toSection: sectionItem.section)
         }
         dataSource.apply(snapshot, animatingDifferences: true)
     }

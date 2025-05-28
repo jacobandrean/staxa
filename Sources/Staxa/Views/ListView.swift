@@ -10,20 +10,20 @@ import UIKit
 
 // MARK: - Model for ListView
 public struct ListSection<Section: Hashable, Item: Hashable>: Hashable {
-    public var title: Section
+    public var section: Section
     public var items: [Item]
     
     public init(title: Section, items: [Item]) {
-        self.title = title
+        self.section = title
         self.items = items
     }
     
     public func hash(into hasher: inout Hasher) {
-        hasher.combine(title)
+        hasher.combine(section)
     }
 
     public static func == (lhs: ListSection, rhs: ListSection) -> Bool {
-        lhs.title == rhs.title
+        lhs.section == rhs.section
     }
 }
 
@@ -34,11 +34,13 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
     public enum Layout {
         case adaptive
         case columns(CGFloat)
+        case rows(numberOfRows: CGFloat, itemHeight: CGFloat)
         case carousel
     }
     
     @Published private var data: [Item] = []
     @Published private var sectionedData: [ListSection<Section, Item>] = []
+    @Published private var isScrollEnabled: Bool = true
     private let layout: Layout
     private let spacing: CGFloat
     private let identifier: String
@@ -151,6 +153,7 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
                     }
                 )
                 .delegate(self)
+                .isScrollEnabled($isScrollEnabled)
         } else {
             return UICollectionView(frame: .zero, collectionViewLayout: compositionalLayout)
                 .backgroundColor(.clear)
@@ -164,6 +167,7 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
                     return cell
                 }
                 .delegate(self)
+                .isScrollEnabled($isScrollEnabled)
         }
     }
     
@@ -205,10 +209,10 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
                 section.boundarySupplementaryItems = sectionContent == nil ? [] : [sectionHeader]
                 
                 return section
-            case .columns(let numberOfItem):
+            case .columns(let numberOfColumns):
                 // item size
                 let itemSize = NSCollectionLayoutSize(
-                    widthDimension: .fractionalWidth(1.0 / numberOfItem),
+                    widthDimension: .fractionalWidth(1.0 / numberOfColumns),
                     heightDimension: .estimated(44)
                 )
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
@@ -221,12 +225,40 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
                 let group = NSCollectionLayoutGroup.horizontal(
                     layoutSize: groupSize,
                     subitem: item,
-                    count: Int(numberOfItem)
+                    count: Int(numberOfColumns)
                 )
                 group.interItemSpacing = .fixed(spacing)
                 
                 // Section
                 let section = NSCollectionLayoutSection(group: group)
+                section.interGroupSpacing = spacing
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+                section.boundarySupplementaryItems = sectionContent == nil ? [] : [sectionHeader]
+                
+                return section
+            case .rows(let numberOfRows, let itemHeight):
+                // item size
+                let itemSize = NSCollectionLayoutSize(
+                    widthDimension: .estimated(44),
+                    heightDimension: .estimated(itemHeight)
+                )
+                let item = NSCollectionLayoutItem(layoutSize: itemSize)
+                
+                // Vertical group
+                let groupSize = NSCollectionLayoutSize(
+                    widthDimension: .estimated(44),
+                    heightDimension: .absolute(numberOfRows * itemHeight)
+                )
+                let group = NSCollectionLayoutGroup.vertical(
+                    layoutSize: groupSize,
+                    subitem: item,
+                    count: Int(numberOfRows)
+                )
+                group.interItemSpacing = .fixed(spacing)
+                
+                // Section
+                let section = NSCollectionLayoutSection(group: group)
+                section.orthogonalScrollingBehavior = .continuous
                 section.interGroupSpacing = spacing
                 section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
                 section.boundarySupplementaryItems = sectionContent == nil ? [] : [sectionHeader]
@@ -270,6 +302,12 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
     @discardableResult
     public func onWillDisplayItem(_ action: @escaping (Item) -> Void) -> Self {
         self.onWillDisplayItem = action
+        return self
+    }
+    
+    @discardableResult
+    public func isScrollEnabled(_ isEnabled: Bool) -> Self {
+        self.isScrollEnabled = isEnabled
         return self
     }
 }
