@@ -5,6 +5,7 @@
 //  Created by Jacob Andrean on 17/02/25.
 //
 
+import Combine
 import UIKit
 
 public extension BuildableView where Self: UIScrollView {
@@ -75,6 +76,12 @@ public extension BuildableView where Self: UIScrollView {
     @discardableResult
     func isScrollEnabled(_ enabled: Bool) -> Self {
         self.isScrollEnabled = enabled
+        return self
+    }
+    
+    @discardableResult
+    func isScrollEnabled<P: Publisher>(_ enabled: P) -> Self where P.Output == Bool, P.Failure == Never {
+        bind(enabled, to: \.isScrollEnabled)
         return self
     }
     
