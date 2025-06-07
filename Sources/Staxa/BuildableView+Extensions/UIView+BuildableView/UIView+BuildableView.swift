@@ -18,7 +18,11 @@ public enum OverlayAlignment {
 
 public extension BuildableView where Self: UIView {
     @discardableResult
-    func overlay(alignment: OverlayAlignment = .fill, _ content: () -> UIView) -> Self {
+    func overlay(
+        alignment: OverlayAlignment = .fill,
+        _ content: () -> UIView,
+        didLayoutOverlayView: ((UIView) -> Void)? = nil
+    ) -> Self {
         let overlayView = content()
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
@@ -55,6 +59,12 @@ public extension BuildableView where Self: UIView {
                 overlayView.frame(width: bounds.width)
             }
             self.addSubview(overlayView)
+        }
+        // FIXME: Temporary workaround for execute code after didLayoutOverlayView
+        if let didLayoutOverlayView {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                didLayoutOverlayView(overlayView)
+            }
         }
         return self
     }
