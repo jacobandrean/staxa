@@ -41,6 +41,8 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
     @Published private var data: [Item] = []
     @Published private var sectionedData: [ListSection<Section, Item>] = []
     @Published private var isScrollEnabled: Bool = true
+    private var adjustsHeightToContent: Bool = false
+    
     private let layout: Layout
     private let spacing: CGFloat
     private let identifier: String
@@ -291,6 +293,19 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
         }
     }
     
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        if adjustsHeightToContent {
+            guard let collectionView = subviews.first(where: { $0 is UICollectionView }) as? UICollectionView else { return }
+            collectionView.layoutIfNeeded()
+            DispatchQueue.main.async { [weak self, weak collectionView] in
+                guard let self, let collectionView else { return }
+                let contentSize = collectionView.collectionViewLayout.collectionViewContentSize
+                frame(height: contentSize.height)
+            }
+        }
+    }
+    
     // MARK: - Delegate
     public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard indexPath.item < data.count else { return }
@@ -308,6 +323,19 @@ public class ListView<Section: Hashable, Item: Hashable>: StaxaView, UICollectio
     @discardableResult
     public func isScrollEnabled(_ isEnabled: Bool) -> Self {
         self.isScrollEnabled = isEnabled
+        return self
+    }
+    
+    @discardableResult
+    public func adjustsHeightToContent(_ adjustsHeightToContent: Bool) -> Self {
+        /// Set an initial height constraint to 1.
+        /// This is necessary in case the list view is used inside an overlay,
+        /// where `layoutSubviews()` may be called while the size is still zero,
+        /// preventing accurate content size calculation.
+        /// This ensures the layout system keeps the view alive and allows for
+        /// proper height adjustment once content is available.
+        self.frame(height: 1)
+        self.adjustsHeightToContent = adjustsHeightToContent
         return self
     }
 }
