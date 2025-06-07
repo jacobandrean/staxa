@@ -123,21 +123,27 @@ public extension BuildableView where Self: UIView {
     func frame(minWidth: CGFloat? = nil, width: CGFloat? = nil, maxWidth: CGFloat? = nil, minHeight: CGFloat? = nil, height: CGFloat? = nil, maxHeight: CGFloat? = nil) -> Self {
         self.translatesAutoresizingMaskIntoConstraints = false
         if let minWidth = minWidth {
+            removeConstraint(for: .width, relation: .greaterThanOrEqual)
             self.widthAnchor.constraint(greaterThanOrEqualToConstant: minWidth).isActive = true
         }
         if let width = width {
+            removeConstraint(for: .width, relation: .equal)
             self.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
         if let maxWidth = maxWidth {
+            removeConstraint(for: .width, relation: .lessThanOrEqual)
             self.widthAnchor.constraint(lessThanOrEqualToConstant: maxWidth).isActive = true
         }
         if let minHeight = minHeight {
+            removeConstraint(for: .height, relation: .greaterThanOrEqual)
             self.heightAnchor.constraint(greaterThanOrEqualToConstant: minHeight).isActive = true
         }
         if let height = height {
+            removeConstraint(for: .height, relation: .equal)
             self.heightAnchor.constraint(equalToConstant: height).isActive = true
         }
         if let maxHeight = maxHeight {
+            removeConstraint(for: .height, relation: .lessThanOrEqual)
             self.heightAnchor.constraint(lessThanOrEqualToConstant: maxHeight).isActive = true
         }
         return self
@@ -246,5 +252,12 @@ public extension BuildableView where Self: UIView {
         ])
         
         return containerView
+    }
+    
+    // Helper: Remove existing constraints for this attribute and relation
+    private func removeConstraint(for attribute: NSLayoutConstraint.Attribute, relation: NSLayoutConstraint.Relation) {
+        self.constraints
+            .filter { $0.firstAttribute == attribute && $0.relation == relation && $0.firstItem as? UIView === self }
+            .forEach { self.removeConstraint($0) }
     }
 }
