@@ -9,78 +9,7 @@ import Combine
 import SwiftUI
 import UIKit
 
-public enum OverlayAlignment {
-    case topLeading, top, topTrailing
-    case leading, center, trailing
-    case bottomLeading, bottom, bottomTrailing
-    case fill
-}
-
 public extension BuildableView where Self: UIView {
-    @discardableResult
-    func overlay(
-        alignment: OverlayAlignment = .fill,
-        _ content: () -> UIView,
-        didLayoutOverlayView: ((UIView) -> Void)? = nil
-    ) -> Self {
-        let overlayView = content()
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let overlaySize = overlayView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-            switch alignment {
-            case .topLeading:
-                break
-            case .top:
-                let xOffset = (bounds.width - overlaySize.width) / 2
-                overlayView.offset(x: xOffset)
-            case .topTrailing:
-                let xOffset = bounds.width - overlaySize.width
-                overlayView.offset(x: xOffset)
-            case .leading:
-                let yOffset = bounds.height / 2
-                overlayView.offset(y: abs(yOffset))
-            case .center:
-                let xOffset = (bounds.width - overlaySize.width) / 2
-                let yOffset = bounds.height / 2
-                overlayView.offset(x: xOffset, y: abs(yOffset))
-            case .trailing:
-                let xOffset = bounds.width - overlaySize.width
-                let yOffset = bounds.height / 2
-                overlayView.offset(x: xOffset, y: abs(yOffset))
-            case .bottomLeading:
-                overlayView.offset(y: bounds.height)
-            case .bottom:
-                let xOffset = (bounds.width - overlaySize.width) / 2
-                overlayView.offset(x: xOffset, y: bounds.height)
-            case .bottomTrailing:
-                let xOffset = bounds.width - overlaySize.width
-                overlayView.offset(x: xOffset, y: bounds.height)
-            case .fill:
-                overlayView.frame(width: bounds.width)
-            }
-            self.addSubview(overlayView)
-        }
-        // FIXME: Temporary workaround for execute code after didLayoutOverlayView
-        if let didLayoutOverlayView {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                didLayoutOverlayView(overlayView)
-            }
-        }
-        return self
-    }
-    
-    // Helper to find parent view controller
-    var parentViewController: UIViewController? {
-        var parentResponder: UIResponder? = self
-        while let responder = parentResponder {
-            if let vc = responder as? UIViewController {
-                return vc
-            }
-            parentResponder = responder.next
-        }
-        return nil
-    }
-    
     /// BuildableView: A Boolean value that indicates whether the element is an accessibility element that an assistive app can access.
     @discardableResult
     func isAccessibilityElement(_ isAccessibilityElement: Bool) -> Self {
