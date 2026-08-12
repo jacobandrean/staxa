@@ -2,7 +2,7 @@
 //  DynamicHeightModalViewController.swift
 //  Staxa
 //
-//  Created by Avows Technologies on 14/05/25.
+//  Created by Jacob Andrean on 14/05/25.
 //
 
 import UIKit

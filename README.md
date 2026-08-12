@@ -52,9 +52,12 @@ A base UIViewController with a body property for clean declarative layout.
 ```swift
 class ProfileVC: StaxaViewController {
     override var body: UIView {
-        VStack {
-            UIImageView().image(UIImage(named: "avatar"))
-            UILabel().text("Welcome").font(.boldSystemFont(ofSize: 24))
+        VStackView {
+            UIImageView()
+                .image(UIImage(named: "avatar"))
+            UILabel()
+                .text("Welcome")
+                .font(.boldSystemFont(ofSize: 24))
         }
         .padding(20)
     }
@@ -63,7 +66,7 @@ class ProfileVC: StaxaViewController {
 
 ## 📐 Layout Building DSL
 
-VStack, HStack, ZStack
+VStackView, HStackView, ZStackView
 
 These are custom stack views that mimic SwiftUI:
 
@@ -81,10 +84,10 @@ VStackView(spacing: 8) {
 ```swift
 class HomeViewController: StaxaViewController {
     override var body: UIView {
-        VStack {
+        VStackView {
             ToolbarView(title: "Home")
             CountdownView()
-            Button(title: "Get Started") {
+            UIButton(title: "Get Started") {
                 print("Tapped Start")
             }
         }
@@ -106,11 +109,8 @@ Inspired by SwiftUI, powered by UIKit.
 
 ## 📄 License
 
-Staxa is available under the MIT license. See LICENSE for more info.
-
 Let me know if you want:
-
-- Usage badges at the top (e.g., iOS version, license, etc.)  
+  
 - A "Contributing" section for open source projects  
 
 Happy shipping with **Staxa**!
