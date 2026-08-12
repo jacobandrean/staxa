@@ -10,6 +10,17 @@ import UIKit
 
 public extension BuildableView where Self: UICollectionView {
     @discardableResult
+    func scrollToItem(indexPath: IndexPath, at position: UICollectionView.ScrollPosition, animated: Bool = true) -> Self {
+        guard self.numberOfSections > 0,
+              self.numberOfItems(inSection: indexPath.section) > 0 else {
+            return self
+        }
+        self.scrollToItem(at: indexPath, at: position, animated: animated)
+        
+        return self
+    }
+    
+    @discardableResult
     func compositionalLayout(_ builder: @escaping () -> UICollectionViewCompositionalLayout) -> Self {
         self.collectionViewLayout = builder()
         return self
@@ -38,7 +49,7 @@ public extension BuildableView where Self: UICollectionView {
         return self
     }
     
-    /// BuildableView: Registers a reusable cell class with the table view.
+    /// DeclarativeView: Registers a reusable cell class with the table view.
     @discardableResult
     func register<Cell: UICollectionViewCell>(_ cellType: Cell.Type) -> Self {
         self.register(cellType, forCellWithReuseIdentifier: String(describing: cellType))
@@ -71,49 +82,49 @@ public extension BuildableView where Self: UICollectionView {
         return self
     }
     
-    /// BuildableView: The layout used to organize the collected view’s items.
+    /// DeclarativeView: The layout used to organize the collected view’s items.
     @discardableResult
     func collectionViewLayout(_ layout: UICollectionViewLayout) -> Self {
         self.collectionViewLayout = layout
         return self
     }
     
-    /// BuildableView: The object that acts as the delegate of the collection view.
+    /// DeclarativeView: The object that acts as the delegate of the collection view.
     @discardableResult
     func delegate(_ delegate: UICollectionViewDelegate?) -> Self {
         self.delegate = delegate
         return self
     }
     
-    /// BuildableView: The object that provides the data for the collection view.
+    /// DeclarativeView: The object that provides the data for the collection view.
     @discardableResult
     func dataSource(_ dataSource: UICollectionViewDataSource?) -> Self {
         self.dataSource = dataSource
         return self
     }
     
-    /// BuildableView: A Boolean value that indicates whether cell and data prefetching are enabled.
+    /// DeclarativeView: A Boolean value that indicates whether cell and data prefetching are enabled.
     @discardableResult
     func isPrefetchingEnabled(_ enabled: Bool) -> Self {
         self.isPrefetchingEnabled = enabled
         return self
     }
     
-    /// BuildableView: A Boolean value that indicates whether users can select items in the collection view.
+    /// DeclarativeView: A Boolean value that indicates whether users can select items in the collection view.
     @discardableResult
     func allowsSelection(_ allowsSelection: Bool) -> Self {
         self.allowsSelection = allowsSelection
         return self
     }
     
-    /// BuildableView: A Boolean value that determines whether users can select more than one item in the collection view.
+    /// DeclarativeView: A Boolean value that determines whether users can select more than one item in the collection view.
     @discardableResult
     func allowsMultipleSelection(_ allowsMultipleSelection: Bool) -> Self {
         self.allowsMultipleSelection = allowsMultipleSelection
         return self
     }
     
-    /// BuildableView: Binds a `@Published` or any `Publisher` to the `UICollectionView DataSource`
+    /// DeclarativeView: Binds a `@Published` or any `Publisher` to the `UICollectionView DataSource`
     @discardableResult
     func bind<T, P: Publisher>(
         to publisher: P,
@@ -134,7 +145,7 @@ public extension BuildableView where Self: UICollectionView {
         return self
     }
     
-    /// BuildableView: Binds a `CurrentValueSubject` to the `UICollectionView DataSource`
+    /// DeclarativeView: Binds a `CurrentValueSubject` to the `UICollectionView DataSource`
     @discardableResult
     func bind<T>(
         to subject: CurrentValueSubject<[T], Never>,
@@ -148,7 +159,7 @@ public extension BuildableView where Self: UICollectionView {
         )
     }
     
-    /// BuildableView: Binds a `PassthroughSubject` to the `UICollectionView DataSource`
+    /// DeclarativeView: Binds a `PassthroughSubject` to the `UICollectionView DataSource`
     @discardableResult
     func bind<T>(
         to subject: PassthroughSubject<[T], Never>,
@@ -166,12 +177,13 @@ public extension BuildableView where Self: UICollectionView {
     func bind<Section: Hashable, Item: Hashable, P: Publisher>(
         to publisher: P,
         section: Section,
+        animatingDifferences: Bool = true,
         cellProvider: @escaping (UICollectionView, IndexPath, Item) -> UICollectionViewCell
-//        storeIn cancellables: inout Set<AnyCancellable>
     ) -> Self where P.Output == [Item], P.Failure == Never {
         
         let dataSourceWrapper = CombineCollectionViewDiffableDataSourceWrapper<Section, Item>(
             collectionView: self,
+            animatingDifferences: animatingDifferences,
             cellProvider: cellProvider
         )
         self.dataSource = dataSourceWrapper.dataSource
@@ -189,12 +201,13 @@ public extension BuildableView where Self: UICollectionView {
     @discardableResult
     func bind<Section: Hashable, Item: Hashable, P: Publisher>(
         to publisher: P,
+        animatingDifferences: Bool = true,
         supplementaryViewProvider: ((UICollectionView, String, Section, IndexPath) -> UICollectionReusableView)? = nil,
         cellProvider: @escaping (UICollectionView, IndexPath, Item) -> UICollectionViewCell
     ) -> Self where P.Output == [ListSection<Section, Item>], P.Failure == Never {
-        
         let dataSourceWrapper = CombineCollectionViewDiffableDataSourceWrapper<Section, Item>(
             collectionView: self,
+            animatingDifferences: animatingDifferences,
             cellProvider: cellProvider
         )
         self.dataSource = dataSourceWrapper.dataSource
@@ -242,11 +255,14 @@ private class CombineCollectionViewDataSource<T>: NSObject, UICollectionViewData
 
 private class CombineCollectionViewDiffableDataSourceWrapper<Section: Hashable, Item: Hashable> {
     let dataSource: UICollectionViewDiffableDataSource<Section, Item>
+    let animatingDifferences: Bool
     
     init(
         collectionView: UICollectionView,
+        animatingDifferences: Bool = true,
         cellProvider: @escaping (UICollectionView, IndexPath, Item) -> UICollectionViewCell
     ) {
+        self.animatingDifferences = animatingDifferences
         self.dataSource = UICollectionViewDiffableDataSource<Section, Item>(
             collectionView: collectionView,
             cellProvider: cellProvider
@@ -257,7 +273,7 @@ private class CombineCollectionViewDiffableDataSourceWrapper<Section: Hashable, 
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections([section])
         snapshot.appendItems(items, toSection: section)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
     }
     
     func apply(sectionedItems: [ListSection<Section, Item>]) {
@@ -266,6 +282,6 @@ private class CombineCollectionViewDiffableDataSourceWrapper<Section: Hashable, 
             snapshot.appendSections([sectionItem.section])
             snapshot.appendItems(sectionItem.items, toSection: sectionItem.section)
         }
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
     }
 }

@@ -9,102 +9,123 @@ import SwiftUI
 import UIKit
 import Combine
 
+extension UITextField {
+    public enum CursorPolicy {
+        case system
+        case preserve
+    }
+}
+
 public extension BuildableView where Self: UITextField {
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func text(_ text: String?) -> Self {
         self.text = text
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView: this is for set the text reactively
+    @discardableResult
+    func text(_ text: AnyPublisher<String?, Never>) -> Self {
+        bind(text, to: \.text)
+        return self
+    }
+    
+    /// DeclarativeView:
     @discardableResult
     func placeholder(_ placeholder: String?) -> Self {
         self.placeholder = placeholder
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func attributedText(_ attributedText: NSAttributedString?) -> Self {
         self.attributedText = attributedText
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func attributedPlaceholder(_ attributedPlaceholder: NSAttributedString?) -> Self {
         self.attributedPlaceholder = attributedPlaceholder
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func textColor(_ color: UIColor?) -> Self {
         self.textColor = color
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func font(_ font: UIFont?) -> Self {
         self.font = font
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func borderStyle(_ style: UITextField.BorderStyle) -> Self {
         self.borderStyle = style
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func keyboardType(_ keyboardType: UIKeyboardType) -> Self {
         self.keyboardType = keyboardType
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func returnKeyType(_ returnKeyType: UIReturnKeyType) -> Self {
         self.returnKeyType = returnKeyType
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func clearButtonMode(_ mode: UITextField.ViewMode) -> Self {
         self.clearButtonMode = mode
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func textAlignment(_ alignment: NSTextAlignment) -> Self {
         self.textAlignment = alignment
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func autocapitalizationType(_ type: UITextAutocapitalizationType) -> Self {
         self.autocapitalizationType = type
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func autocorrectionType(_ type: UITextAutocorrectionType) -> Self {
         self.autocorrectionType = type
         return self
     }
     
-    /// BuildableView:
+    /// DeclarativeView:
     @discardableResult
     func isSecureTextEntry(_ isSecure: Bool) -> Self {
         isSecureTextEntry = isSecure
+        return self
+    }
+    
+    /// DeclarativeView:
+    @discardableResult
+    func maxInput(_ length: Int) -> Self {
+        self.maxInputLength = length
         return self
     }
     
@@ -134,11 +155,66 @@ public extension BuildableView where Self: UITextField {
         
         return self
     }
+    
+    @discardableResult
+    func text(
+        _ binding: PublishedBinding<String?>,
+        cursorPolicy: CursorPolicy = .system
+    ) -> Self {
+        switch cursorPolicy {
+        case .system:
+            bind(binding.projectedValue, to: \.text)
+        case .preserve:
+            binding.projectedValue
+                .receive(on: DispatchQueue.main)
+                .removeDuplicates()
+                .sink { [weak self] newText in
+                    self?.setTextPreservingCursor(newText)
+                }
+                .store(in: &viewCancellables)
+        }
+        didChangeAction = {
+            binding.wrappedValue = $0
+        }
+        return self
+    }
+    
+    private func setTextPreservingCursor(_ newText: String?) {
+        guard text != newText else { return }
+
+        let oldRange = selectedTextRange
+        text = newText
+
+        guard
+            let oldRange,
+            let start = position(
+                from: beginningOfDocument,
+                offset: offset(from: beginningOfDocument, to: oldRange.start)
+            )
+        else { return }
+
+        selectedTextRange = textRange(from: start, to: start)
+    }
+    
+    @discardableResult
+    func didBeginEditing(_ action: (() -> Void)?) -> Self {
+        didBeginEditingAction = action
+        return self
+    }
+    
+    @discardableResult
+    func didEndEditing(_ action: (() -> Void)?) -> Self {
+        didEndEditingAction = action
+        return self
+    }
 }
 
 // MARK: - Helpers
 fileprivate final class UITextFieldStorage {
     var didChangeAction: ((String?) -> Void)?
+    var didBeginEditingAction: (() -> Void)?
+    var didEndEditingAction: (() -> Void)?
+    var maxInputLength: Int?
 }
 
 extension UITextField {
@@ -154,6 +230,14 @@ extension UITextField {
         }
     }
     
+    var maxInputLength: Int? {
+        get { storage.maxInputLength }
+        set {
+            storage.maxInputLength = newValue
+            addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        }
+    }
+    
     var didChangeAction: ((String?) -> Void)? {
         get { storage.didChangeAction }
         set {
@@ -163,6 +247,34 @@ extension UITextField {
     }
     
     @objc private func textFieldDidChange() {
+        if let maxInputLength = storage.maxInputLength, let currentText = text, currentText.count > maxInputLength {
+            text = String(currentText.prefix(maxInputLength))
+            return
+        }
         didChangeAction?(text)
+    }
+    
+    var didBeginEditingAction: (() -> Void)? {
+        get { storage.didBeginEditingAction }
+        set {
+            storage.didBeginEditingAction = newValue
+            addTarget(self, action: #selector(didBeginEditing), for: .editingDidBegin)
+        }
+    }
+    
+    var didEndEditingAction: (() -> Void)? {
+        get { storage.didEndEditingAction }
+        set {
+            storage.didEndEditingAction = newValue
+            addTarget(self, action: #selector(didEndEditing), for: .editingDidEnd)
+        }
+    }
+    
+    @objc private func didBeginEditing() {
+        storage.didBeginEditingAction?()
+    }
+    
+    @objc private func didEndEditing() {
+        storage.didEndEditingAction?()
     }
 }

@@ -45,6 +45,17 @@ public extension BuildableView where Self: UIButton {
     }
 }
 
+public extension UIButton {
+    convenience init(
+        _ title: String?,
+        action: @escaping () -> Void
+    ) {
+        self.init(type: .system)
+        self.title(title)
+            .onTap(action)
+    }
+}
+
 #Preview {
     UIViewPreview {
         let button = UIButton()
